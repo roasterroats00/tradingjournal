@@ -1,8 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   reactCompiler: true,
+  // Enable server components external packages for native modules
+  serverExternalPackages: ["better-sqlite3"],
 };
 
 export default nextConfig;

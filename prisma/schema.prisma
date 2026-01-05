@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  password     String
+  name         String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  trades       Trade[]
+  settings     UserSettings?
+  dailyStats   DailyStats[]
+}
+
+model Trade {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  tradeDate   DateTime
+  pair        String   // e.g., XAUUSD, BTCUSD
+  session     String   // Asia, London, New York
+  timeframe   String   // M5, M15, H1, etc
+  direction   String   // Buy, Sell
+  
+  entryPrice  Float
+  stopLoss    Float
+  takeProfit  Float
+  lotSize     Float
+  
+  riskPercent Float    // Calculated risk percentage
+  rrRatio     Float    // Risk:Reward ratio (auto-calculated)
+  
+  result      String   // Win, Loss, BE (Break Even)
+  profitLoss  Float    // Profit/Loss in $
+  
+  notes       String?  // Emotional state, reasoning
+  screenshot  String?  // Chart screenshot URL (optional)
+  
+  // Pre-trade checklist
+  trendAligned      Boolean @default(false)
+  entryAtKeyLevel   Boolean @default(false)
+  stopLossDefined   Boolean @default(true)
+  rrAboveMinimum    Boolean @default(false)
+  riskWithinLimit   Boolean @default(false)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([tradeDate])
+}
+
+model UserSettings {
+  id              String  @id @default(cuid())
+  userId          String  @unique
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  maxRiskPerTrade Float   @default(2.0)  // Default 2%
+  maxDailyLoss    Float   @default(4.0)  // Default 4%
+  maxTradesPerDay Int     @default(5)
+  startingBalance Float   @default(100.0) // Default $100
+  currentBalance  Float   @default(100.0)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model DailyStats {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  date        DateTime
+  totalTrades Int      @default(0)
+  totalProfit Float    @default(0)
+  totalLoss   Float    @default(0)
+  netResult   Float    @default(0)
+  isLocked    Boolean  @default(false) // Trading locked for this day
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId])
+}
