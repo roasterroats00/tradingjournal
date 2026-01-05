@@ -1,14 +1,10 @@
 import { Navbar } from "@/components/Navbar";
-import { requireAuth } from "@/lib/require-auth";
 
-export default async function DashboardLayout({
+export default function DashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    // Protect this route
-    await requireAuth();
-
     return (
         <div className="min-h-screen relative selection:bg-cyan-500/30 selection:text-cyan-400">
             {/* Tech Grid Background Overlay */}
