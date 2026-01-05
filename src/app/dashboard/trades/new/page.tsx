@@ -24,9 +24,13 @@ export default function NewTradePage() {
         const sl = parseFloat(stopLoss);
         const tp = parseFloat(takeProfit);
 
-        if (entry && sl && tp) {
-            const rr = calculateRR(entry, sl, tp, direction);
-            setRrRatio(rr);
+        if (entry && sl) {
+            if (tp) {
+                const rr = calculateRR(entry, sl, tp, direction);
+                setRrRatio(rr);
+            } else {
+                setRrRatio(null); // No TP = No RR
+            }
         }
     }
 
@@ -223,31 +227,51 @@ export default function NewTradePage() {
                             {/* Take Profit */}
                             <div>
                                 <label className="block text-sm font-medium text-slate-300 mb-2">
-                                    Take Profit
+                                    Take Profit <span className="text-slate-500 text-xs">(Optional)</span>
                                 </label>
                                 <input
                                     type="number"
                                     name="takeProfit"
                                     step="0.00001"
-                                    required
                                     value={takeProfit}
                                     onChange={(e) => {
                                         setTakeProfit(e.target.value);
                                         setTimeout(updateRR, 0);
                                     }}
-                                    placeholder="1.1300"
+                                    placeholder="1.1300 (leave empty if no TP)"
                                     className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
                                 />
                             </div>
                         </div>
 
                         {/* RR Display */}
-                        {rrRatio !== null && (
-                            <div className={`mt-4 p-4 rounded-lg ${rrRatio >= 2 ? "bg-emerald-500/20 border border-emerald-500/50" : "bg-yellow-500/20 border border-yellow-500/50"}`}>
-                                <p className={`font-semibold ${rrRatio >= 2 ? "text-emerald-400" : "text-yellow-400"}`}>
-                                    Risk:Reward = 1:{rrRatio}
-                                    {rrRatio < 2 && " ⚠️ Below minimum (1:2)"}
+                        {entryPrice && stopLoss && (
+                            <div className={`mt-4 p-4 rounded-lg ${rrRatio === null
+                                    ? "bg-orange-500/20 border border-orange-500/50"
+                                    : rrRatio >= 2
+                                        ? "bg-emerald-500/20 border border-emerald-500/50"
+                                        : "bg-yellow-500/20 border border-yellow-500/50"
+                                }`}>
+                                <p className={`font-semibold ${rrRatio === null
+                                        ? "text-orange-400"
+                                        : rrRatio >= 2
+                                            ? "text-emerald-400"
+                                            : "text-yellow-400"
+                                    }`}>
+                                    {rrRatio !== null ? (
+                                        <>
+                                            Risk:Reward = 1:{rrRatio.toFixed(2)}
+                                            {rrRatio < 2 && " ⚠️ Below minimum (1:2)"}
+                                        </>
+                                    ) : (
+                                        <>⚠️ No Take Profit set - RR ratio: N/A</>
+                                    )}
                                 </p>
+                                {rrRatio === null && (
+                                    <p className="text-orange-300 text-sm mt-2">
+                                        Trading without a Take Profit target is risky. Consider setting a profit target.
+                                    </p>
+                                )}
                             </div>
                         )}
                     </div>

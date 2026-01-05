@@ -60,18 +60,22 @@ export async function createTrade(formData: FormData) {
 
     const data = parsed.data;
 
-    // Calculate RR
-    const rrRatio = calculateRR(
-        data.entryPrice,
-        data.stopLoss,
-        data.takeProfit,
-        data.direction
-    );
+    // Calculate RR (only if TP is provided)
+    const rrRatio = data.takeProfit
+        ? calculateRR(
+            data.entryPrice,
+            data.stopLoss,
+            data.takeProfit,
+            data.direction
+        )
+        : null;
 
-    // Validate RR
-    const rrValidation = validateRR(rrRatio, 2);
-    if (!rrValidation.valid && !data.rrAboveMinimum) {
-        return { error: rrValidation.reason + " Check the RR confirmation." };
+    // Validate RR (only if TP is provided)
+    if (rrRatio !== null) {
+        const rrValidation = validateRR(rrRatio, 2);
+        if (!rrValidation.valid && !data.rrAboveMinimum) {
+            return { error: rrValidation.reason + " Check the RR confirmation." };
+        }
     }
 
     // Calculate risk percent (simplified - based on lot size and price difference)
@@ -101,10 +105,10 @@ export async function createTrade(formData: FormData) {
                 direction: data.direction,
                 entryPrice: data.entryPrice,
                 stopLoss: data.stopLoss,
-                takeProfit: data.takeProfit,
+                takeProfit: data.takeProfit || null,
                 lotSize: data.lotSize,
                 riskPercent,
-                rrRatio,
+                rrRatio: rrRatio ?? null,
                 result: data.result,
                 profitLoss: data.profitLoss,
                 notes: data.notes || null,

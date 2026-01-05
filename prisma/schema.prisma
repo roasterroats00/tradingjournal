@@ -35,11 +35,11 @@ model Trade {
   
   entryPrice  Float
   stopLoss    Float
-  takeProfit  Float
+  takeProfit  Float?   // Optional: for trades without TP
   lotSize     Float
   
   riskPercent Float    // Calculated risk percentage
-  rrRatio     Float    // Risk:Reward ratio (auto-calculated)
+  rrRatio     Float?   // Risk:Reward ratio (auto-calculated, null if no TP)
   
   result      String   // Win, Loss, BE (Break Even)
   profitLoss  Float    // Profit/Loss in $

@@ -26,7 +26,10 @@ export const createTradeSchema = z.object({
     direction: z.enum(directions),
     entryPrice: z.coerce.number().positive("Entry price must be positive"),
     stopLoss: z.coerce.number().positive("Stop loss must be positive"),
-    takeProfit: z.coerce.number().positive("Take profit must be positive"),
+    takeProfit: z.preprocess(
+        (val) => val === "" || val === null || val === undefined ? undefined : val,
+        z.coerce.number().positive("Take profit must be positive").optional()
+    ),
     lotSize: z.coerce.number().positive("Lot size must be positive"),
     result: z.enum(tradeResults),
     profitLoss: z.coerce.number(),
